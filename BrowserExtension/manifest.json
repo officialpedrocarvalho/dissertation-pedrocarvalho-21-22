@@ -1,0 +1,34 @@
+{
+    "manifest_version": 3,
+    "name": "WebAppRecorder",
+    "description": "Javascript extension to record user's usage data in web applications/sites related to urls, paths travelled, actions taken and pages structure.",
+    "author": "Pedro Carvalho",
+    "permissions": [
+        "activeTab"
+    ],
+    "version": "1.0.0",
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "Click Me",
+        "default_icon": {
+            "16": "img/icon16.png",
+            "24": "img/icon24.png", 
+            "32": "img/icon32.png"
+        }
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "Content.js"
+            ]
+        }
+    ],
+    "icons": {
+        "16": "img/icon16.png",
+        "48": "img/icon48.png",
+        "128": "img/icon128.png"
+    }
+}
