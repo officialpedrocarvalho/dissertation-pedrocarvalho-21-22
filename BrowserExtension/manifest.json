@@ -9,7 +9,7 @@
     "version": "1.0.0",
     "action": {
         "default_popup": "popup.html",
-        "default_title": "Click Me",
+        "default_title": "WebAppRecorder",
         "default_icon": {
             "16": "img/icon16.png",
             "24": "img/icon24.png", 
