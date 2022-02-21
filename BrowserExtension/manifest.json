@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Captain Unicorn",
+    "name": "Web Recorder",
     "description": "Javascript extension to record user's usage data in web applications/sites related to urls, paths travelled, actions taken and pages structure.",
     "author": "Pedro Carvalho",
     "permissions": [
@@ -9,7 +9,7 @@
     "version": "1.0.0",
     "action": {
         "default_popup": "popup.html",
-        "default_title": "Captain Unicorn",
+        "default_title": "Web Recorder",
         "default_icon": {
             "16": "img/icon16.png",
             "24": "img/icon24.png", 

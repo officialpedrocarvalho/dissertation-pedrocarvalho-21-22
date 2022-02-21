@@ -1,9 +1,15 @@
-from rest_framework.serializers import HyperlinkedModelSerializer
+from rest_framework.serializers import ModelSerializer
 
-from CollectDataAPI.models import Data
+from CollectDataAPI.models import WebPage, WebSite
 
 
-class DataSerializer(HyperlinkedModelSerializer):
+class WebSiteSerializer(ModelSerializer):
     class Meta:
-        model = Data
-        fields = ['domain', 'queryParams']
+        model = WebSite
+        fields = ['domain', ]
+
+
+class WebPageSerializer(ModelSerializer):
+    class Meta:
+        model = WebPage
+        fields = ['webSite', 'url', 'queryParams', 'pageStructure']
