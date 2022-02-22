@@ -3,8 +3,9 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from CollectDataAPI.models import WebPage, WebSite
-from CollectDataAPI.serializers import WebPageSerializer, WebSiteSerializer
+from CollectDataAPI.models import WebPage, WebSite, WebPageSpecification, Domain
+from CollectDataAPI.serializers import WebPageSerializer, WebSiteSerializer, WebPageSpecificationSerializer, \
+    DomainSerializer
 
 
 class WebSiteViewSet(ModelViewSet):
@@ -16,12 +17,30 @@ class WebSiteViewSet(ModelViewSet):
     # permission_classes = [permissions.IsAuthenticated]
 
 
+class DomainViewSet(ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    queryset = Domain.objects.all()
+    serializer_class = DomainSerializer
+    # permission_classes = [permissions.IsAuthenticated]
+
+
 class WebPageViewSet(ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
     queryset = WebPage.objects.all()
     serializer_class = WebPageSerializer
+    # permission_classes = [permissions.IsAuthenticated]
+
+
+class WebPageSpecificationViewSet(ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    queryset = WebPageSpecification.objects.all()
+    serializer_class = WebPageSpecificationSerializer
 
     # permission_classes = [permissions.IsAuthenticated]
 

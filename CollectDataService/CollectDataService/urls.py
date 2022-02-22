@@ -17,11 +17,13 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework import routers
 
-from CollectDataAPI.views import WebPageViewSet, WebSiteViewSet
+from CollectDataAPI.views import WebPageViewSet, WebSiteViewSet, DomainViewSet, WebPageSpecificationViewSet
 
 router = routers.DefaultRouter(trailing_slash=False)
-router.register(r'webPage', WebPageViewSet)
+router.register(r'domain', DomainViewSet)
 router.register(r'webSite', WebSiteViewSet)
+router.register(r'webPage', WebPageViewSet)
+router.register(r'webPageSpecification', WebPageSpecificationViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
