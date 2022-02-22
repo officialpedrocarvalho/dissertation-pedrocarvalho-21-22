@@ -1,16 +1,16 @@
 from django.contrib.sessions.models import Session
-from rest_framework import permissions, status
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from CollectDataAPI.models import WebPage, WebSite, WebPageSpecification, Domain
-from CollectDataAPI.serializers import WebPageSerializer, WebSiteSerializer, WebPageSpecificationSerializer, \
+from CollectDataAPI.models import WebSite, WebPageSpecification, Domain
+from CollectDataAPI.serializers import WebSiteSerializer, WebPageSpecificationSerializer, \
     DomainSerializer
 
 
 class WebSiteViewSet(ModelViewSet):
     """
-    API endpoint that allows users to be viewed or edited.
+    API endpoint that allows WebSites to be viewed or edited.
     """
     queryset = WebSite.objects.all()
     serializer_class = WebSiteSerializer
@@ -19,25 +19,16 @@ class WebSiteViewSet(ModelViewSet):
 
 class DomainViewSet(ModelViewSet):
     """
-    API endpoint that allows users to be viewed or edited.
+    API endpoint that allows Domains to be viewed or edited.
     """
     queryset = Domain.objects.all()
     serializer_class = DomainSerializer
     # permission_classes = [permissions.IsAuthenticated]
 
 
-class WebPageViewSet(ModelViewSet):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
-    queryset = WebPage.objects.all()
-    serializer_class = WebPageSerializer
-    # permission_classes = [permissions.IsAuthenticated]
-
-
 class WebPageSpecificationViewSet(ModelViewSet):
     """
-    API endpoint that allows users to be viewed or edited.
+    API endpoint that allows WebPageSpecifications to be viewed or edited.
     """
     queryset = WebPageSpecification.objects.all()
     serializer_class = WebPageSpecificationSerializer

@@ -6,13 +6,13 @@ from CollectDataAPI.models import WebPage, WebSite, Domain, WebPageSpecification
 class WebSiteSerializer(ModelSerializer):
     class Meta:
         model = WebSite
-        fields = ['address', ]
+        fields = ['name', ]
 
 
 class DomainSerializer(ModelSerializer):
     class Meta:
         model = Domain
-        fields = ['domain', ]
+        fields = ['domain', 'webSite']
 
 
 class WebPageSerializer(ModelSerializer):
@@ -24,4 +24,4 @@ class WebPageSerializer(ModelSerializer):
 class WebPageSpecificationSerializer(ModelSerializer):
     class Meta:
         model = WebPageSpecification
-        fields = ['webPage', 'url', 'queryParams', 'pageStructure']
+        fields = ['url', 'queryParams', 'pageStructure']
