@@ -8,18 +8,19 @@ class WebSite(models.Model):
 
 
 class Domain(models.Model):
-    domain = models.CharField(max_length=100, unique=True)
     webSite = models.ForeignKey(WebSite, on_delete=models.CASCADE, to_field='name')
+    domain = models.URLField(unique=True)
 
 
 class WebPage(models.Model):
     webSite = models.ForeignKey(WebSite, on_delete=models.CASCADE, to_field='name')
-    pageStructure = models.JSONField()
+    pageStructure = models.TextField()
 
 
 class WebPageSpecification(models.Model):
     webPage = models.ForeignKey(WebPage, on_delete=models.CASCADE)
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
-    url = models.CharField(max_length=100)
+    url = models.URLField()
     queryParams = ArrayField(models.CharField(max_length=10), null=True, blank=True)
-    pageStructure = models.JSONField()
+    pageStructure = models.TextField()
+    similarity = models.DecimalField(decimal_places=2, max_digits=3)
