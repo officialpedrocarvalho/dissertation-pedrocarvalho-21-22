@@ -1,5 +1,22 @@
 const servicePath = "http://127.0.0.1:8000";
-const unwantedTags = ["SCRIPT"];
+const unwantedTags = [
+  "SCRIPT",
+  "LI",
+  "TD",
+  "TR",
+  "SPAN",
+  "B",
+  "STRONG",
+  "EM",
+  "MARK",
+  "SMALL",
+  "DEL",
+  "INS",
+  "SUB",
+  "SUP",
+  "STYLE",
+  "NOSCRIPT",
+];
 
 /**
  * Function that returns only the domain from the URL.
@@ -92,9 +109,49 @@ function saveData(data) {
 /**
  * Event listner to detect whenever a new page is loaded or reloaded.
  */
-window.addEventListener("load", (event) => {
+/* window.addEventListener("load", (event) => {
   let url = getUrl(window.location.href);
   let queryParams = getQueryParams(window.location.href);
   let pageStructure = getWebPageStructure();
   saveData({url,queryParams,pageStructure})
+}); */
+
+const tagName = (e) => {
+  switch (e?.nodeType) {
+    case 1:
+      return e.tagName;
+  }
+};
+
+function getPageStructure() {
+  return document.querySelector("body").outerHTML;
+  return Array.from(document.body.getElementsByTagName("*"), tagName).filter(
+    function (e) {
+      return ![].includes(e);
+    }
+  );
+}
+
+window.addEventListener("load", (event) => {
+  let url = getUrl(window.location.href);
+  let queryParams = getQueryParams(window.location.href);
+  let pageStructure = getPageStructure();
+  saveData({url,queryParams,pageStructure})
 });
+
+
+
+
+
+function testing(e, tag) {
+  for (const child of e.childNodes) {
+    switch (e?.nodeType) {
+      case 1:
+        testing(child, tag.concat("["+e.tagName));
+    }
+  }
+  console.log(tag)
+  return tag.concat(e.tagName+"]");
+}
+
+//console.log(testing(document.querySelector("body"), ""));
