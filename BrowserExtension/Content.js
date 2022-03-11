@@ -1,10 +1,25 @@
 const servicePath = "http://127.0.0.1:8000";
-const unwantedTags = [
+const unwantedTags2 = [
   "SCRIPT",
   "LI",
   "TD",
   "TR",
   "SPAN",
+  "B",
+  "STRONG",
+  "EM",
+  "MARK",
+  "SMALL",
+  "DEL",
+  "INS",
+  "SUB",
+  "SUP",
+  "STYLE",
+  "NOSCRIPT",
+];
+
+const unwantedTags = [
+  "SCRIPT",
   "B",
   "STRONG",
   "EM",
@@ -63,8 +78,8 @@ function getWebPageStructure() {
  */
 const element = (e) => ({
   tag: e.tagName,
-  //attributes:
-  //Array.from(e.attributes, ({name, value}) => [name, value]),
+  classes: extractAttributes(e.attributes, "class"),
+  id: extractAttributes(e.attributes, "id"),
   children: Array.from(e.childNodes, node)
     .filter(Boolean)
     .filter(function (e) {
@@ -86,19 +101,41 @@ const node = (e) => {
 };
 
 /**
+ *
+ * @param {*} name
+ * @param {*} value
+ * @returns
+ */
+const classes = ({ name, value }) => {
+  switch (name) {
+    case "class":
+      return value.split(" ");
+  }
+};
+
+const extractAttributes = (e, a) => {
+  for (const [key, value] of Object.entries(e)) {
+    if (value.name == a) {
+      return value.value.split(" ");
+    }
+  }
+  return [];
+};
+
+/**
  * Function that makes a HTTP POST request to the Collect Data Service to save the collected data.
  *
  * @param {*} data structure that cointains all the data attributes needed
  */
 function saveData(data) {
   let http = new XMLHttpRequest();
-  http.open("POST", servicePath + "/webPageSpecification", true);
+  http.open("PUT", servicePath + "/webPageSpecification/1", true);
   http.setRequestHeader("Content-Type", "application/json");
   http.onload = function () {
     if (this.status === 201) {
-      console.log(this.response);
+      //console.log(this.response);
     }
-    console.log(this.response);
+    //console.log(this.response);
   };
   http.onerror = function () {
     console.log(this);
@@ -109,12 +146,23 @@ function saveData(data) {
 /**
  * Event listner to detect whenever a new page is loaded or reloaded.
  */
-/* window.addEventListener("load", (event) => {
+/*window.addEventListener("load", (event) => {
   let url = getUrl(window.location.href);
   let queryParams = getQueryParams(window.location.href);
   let pageStructure = getWebPageStructure();
-  saveData({url,queryParams,pageStructure})
-}); */
+  console.log(pageStructure)
+  saveData({ url, queryParams, pageStructure });
+});*/
+
+window.onload = function afterWebPageLoad() {
+  setTimeout(function () {
+    console.log("SENT REUEST");
+    let url = getUrl(window.location.href);
+    let queryParams = getQueryParams(window.location.href);
+    let pageStructure = getWebPageStructure();
+    saveData({ url, queryParams, pageStructure });
+  }, 3000);
+};
 
 const tagName = (e) => {
   switch (e?.nodeType) {
@@ -132,26 +180,9 @@ function getPageStructure() {
   );
 }
 
-window.addEventListener("load", (event) => {
+/*window.addEventListener("load", (event) => {
   let url = getUrl(window.location.href);
   let queryParams = getQueryParams(window.location.href);
   let pageStructure = getPageStructure();
   saveData({url,queryParams,pageStructure})
-});
-
-
-
-
-
-function testing(e, tag) {
-  for (const child of e.childNodes) {
-    switch (e?.nodeType) {
-      case 1:
-        testing(child, tag.concat("["+e.tagName));
-    }
-  }
-  console.log(tag)
-  return tag.concat(e.tagName+"]");
-}
-
-//console.log(testing(document.querySelector("body"), ""));
+});*/
