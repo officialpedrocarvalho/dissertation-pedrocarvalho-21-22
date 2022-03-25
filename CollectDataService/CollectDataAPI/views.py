@@ -47,15 +47,6 @@ class WebPageSpecificationViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         structure = canonical_extraction(serializer.validated_data.get('pageStructure'))
         print(structure)
-        print()
-        structure = canonical_extraction_comparing_classes(serializer.validated_data.get('pageStructure'))
-        print(structure)
-        print()
-        structure = canonical_extraction_comparing_tags_classes(serializer.validated_data.get('pageStructure'))
-        print(structure)
-        print()
-        structure = canonical_extraction_comparing_classes_ids(serializer.validated_data.get('pageStructure'))
-        print(structure)
         return Response(status=status.HTTP_200_OK)
 
     def create(self, request):
@@ -120,119 +111,6 @@ def canonical_extraction(json):
     values = []
 
     def extract(json, values):
-        if json["children"]:
-            values.append("(")
-        for count, element in enumerate(json["children"]):
-            values.append(element["tag"])
-            extract(element, values)
-        if json["children"]:
-            values.append(")")
-        return values
-
-    values.append(json["tag"])
-    values = extract(json, values)
-    return ' '.join(values)
-
-
-def canonical_extraction_comparing_classes(json):
-    """Recursively builds a string representing the canonical form of a html web page structure."""
-    values = []
-
-    def extract(json, values):
-        """Compares the classes from the actual element with the previous one and:
-         - if they are all the same the element is ignored."""
-        if json["children"]:
-            values.append("(")
-        for count, element in enumerate(json["children"]):
-            if count != 0:
-                if len(element["classes"]) != 0:
-                    if set(json["children"][count - 1]["classes"]) != set(element["classes"]):
-                        values.append(element["tag"])
-                        extract(element, values)
-                else:
-                    values.append(element["tag"])
-                    extract(element, values)
-            else:
-                values.append(element["tag"])
-                extract(element, values)
-        if json["children"]:
-            values.append(")")
-        return values
-
-    values.append(json["tag"])
-    values = extract(json, values)
-    return ' '.join(values)
-
-
-def canonical_extraction_comparing_tags_classes(json):
-    """Recursively builds a string representing the canonical form of a html web page structure."""
-    values = []
-
-    def extract(json, values):
-        """If the tags are the same it compares the classes from the actual element with the previous one and:
-        - if they are all the same the element is ignored."""
-        if json["children"]:
-            values.append("(")
-        for count, element in enumerate(json["children"]):
-            if count != 0:
-                if len(element["classes"]) != 0:
-                    if json["children"][count - 1]["tag"] != element["tag"] or set(
-                            json["children"][count - 1]["classes"]) != set(element["classes"]):
-                        values.append(element["tag"])
-                        extract(element, values)
-                else:
-                    values.append(element["tag"])
-                    extract(element, values)
-            else:
-                values.append(element["tag"])
-                extract(element, values)
-        if json["children"]:
-            values.append(")")
-        return values
-
-    values.append(json["tag"])
-    values = extract(json, values)
-    return ' '.join(values)
-
-
-def canonical_extraction_comparing_tags_classes_2(json):
-    """Recursively builds a string representing the canonical form of a html web page structure."""
-    values = []
-
-    def extract(json, values):
-        """If the tags are the same it compares the classes from the actual element with the previous one and:
-            - if they are all the same the element is ignored.
-            - if both elements have 0 classes the element is ignored"""
-        if json["children"]:
-            values.append("(")
-        for count, element in enumerate(json["children"]):
-            if count != 0:
-                if len(element["classes"]) != 0:
-                    if json["children"][count - 1]["tag"] != element["tag"] or set(
-                            json["children"][count - 1]["classes"]) != set(element["classes"]):
-                        values.append(element["tag"])
-                        extract(element, values)
-                else:
-                    if json["children"][count - 1]["tag"] != element["tag"]:
-                        values.append(element["tag"])
-                        extract(element, values)
-            else:
-                values.append(element["tag"])
-                extract(element, values)
-        if json["children"]:
-            values.append(")")
-        return values
-
-    values.append(json["tag"])
-    values = extract(json, values)
-    return ' '.join(values)
-
-
-def canonical_extraction_comparing_classes_ids(json):
-    """Recursively builds a string representing the canonical form of a html web page structure."""
-    values = []
-
-    def extract(json, values):
         """Compares classes and id from the actual element with the previous one and:
             - if one of these matches the element is ignored"""
         if json["children"]:
@@ -240,11 +118,13 @@ def canonical_extraction_comparing_classes_ids(json):
         for count, element in enumerate(json["children"]):
             if count != 0:
                 if len(element["classes"]) != 0:
-                    if set(json["children"][count - 1]["classes"]) != set(element["classes"]):
+                    if json["children"][count - 1]["tag"] != element["tag"] or set(
+                            json["children"][count - 1]["classes"]) != set(element["classes"]):
                         values.append(element["tag"])
                         extract(element, values)
                 elif len(element["id"]) != 0:
-                    if set(json["children"][count - 1]["id"]) != set(element["id"]):
+                    if json["children"][count - 1]["tag"] != element["tag"] or set(
+                            json["children"][count - 1]["id"]) != set(element["id"]):
                         values.append(element["tag"])
                         extract(element, values)
                 else:

@@ -100,19 +100,6 @@ const node = (e) => {
   }
 };
 
-/**
- *
- * @param {*} name
- * @param {*} value
- * @returns
- */
-const classes = ({ name, value }) => {
-  switch (name) {
-    case "class":
-      return value.split(" ");
-  }
-};
-
 const extractAttributes = (e, a) => {
   for (const [key, value] of Object.entries(e)) {
     if (value.name == a) {
