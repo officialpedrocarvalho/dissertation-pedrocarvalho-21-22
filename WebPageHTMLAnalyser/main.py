@@ -4,6 +4,7 @@ import sys
 
 import sequence_comparison
 import tree_edit_distance
+from export import results_to_excel
 
 
 def get_files(directory):
@@ -33,15 +34,15 @@ def get_files(directory):
 #     return fp, fn, tp, tn
 
 
-def get_results(pages, offset, method):
-    final_data = [0] * 14 * 4
+def get_results(pages, method):
+    final_data = [0] * 21 * 4
     for i, first in enumerate(pages, start=1):
         for j, second in enumerate(pages, start=1):
             if j > i:
                 result = method(first[0], second[0])
                 aux = 0
-                offset = 0.35
-                for offset_count in range(14):
+                offset = 0.0
+                for offset_count in range(21):
                     # TP
                     if result >= offset and first[1] == second[1]:
                         final_data[aux + 0] += 1
@@ -64,11 +65,12 @@ if __name__ == '__main__':
     path = arguments[0]
     offset = float(arguments[1])
     files = get_files(path)
+    final_data = get_results(files, sequence_comparison.similarity_rate)
     # fp, fn, tp, tn = get_results(files, offset, sequence_comparison.similarity_rate)
     # print("False Positives: " + str(fp) + "\n", "False Negatives: " + str(fn) + "\n",
     #      "True Positives: " + str(tp) + "\n", "True Negatives: " + str(tn))
-    final_data = get_results(files, offset, tree_edit_distance.similarity_rate)
-    print(final_data)
+    # final_data = get_results(files, tree_edit_distance.similarity_rate)
+    results_to_excel(final_data, 0, 0.05, 'LCS')
     print("THE END")
     # fp, fn, tp, tn = get_results(files, offset, tree_edit_distance.similarity_rate)
     # print("False Positives: " + str(fp) + "\n", "False Negatives: " + str(fn) + "\n",
