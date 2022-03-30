@@ -53,37 +53,38 @@ def filter_unwanted_tags(element):
         return element
 
 
-def canonical_extraction(json):
-    """Recursively builds a string representing the canonical form of a html web page structure."""
-    values = []
+def html_to_json_improved(html):
+    return {
+        "tag": html.tag,
+        "classes": html.get('class').split(" ") if html.get('class') else [],
+        "id": html.get('id').split(" ") if html.get('id') else [],
+        "children": canonical(list(filter(filter_unwanted_tags_canonical, html.getchildren())))
+    }
 
-    def extract(json, values):
-        """Compares classes and id from the actual element with the previous one and:
-            - if one of these matches the element is ignored"""
-        if json["children"]:
-            values.append("(")
-        for count, element in enumerate(json["children"]):
-            if count != 0:
-                if len(element["classes"]) != 0:
-                    if json["children"][count - 1]["tag"] != element["tag"] or set(
-                            json["children"][count - 1]["classes"]) != set(element["classes"]):
-                        values.append(element["tag"])
-                        extract(element, values)
-                elif len(element["id"]) != 0:
-                    if json["children"][count - 1]["tag"] != element["tag"] or set(
-                            json["children"][count - 1]["id"]) != set(element["id"]):
-                        values.append(element["tag"])
-                        extract(element, values)
+
+def canonical(children):
+    result = []
+    for index, child in enumerate(children):
+        if isinstance(child, lxml.html.HtmlElement):
+            if index != 0:
+                previous_child = children[index - 1]
+                previous_classes = previous_child.get('class').split(" ") if previous_child.get('class') else []
+                previous_ids = previous_child.get('id').split(" ") if previous_child.get('id') else []
+                actual_classes = child.get('class').split(" ") if child.get('class') else []
+                actual_ids = child.get('id').split(" ") if child.get('id') else []
+                if len(actual_classes) != 0:
+                    if previous_child.tag != child.tag or set(previous_classes) != set(actual_classes):
+                        result.append(html_to_json_improved(child))
+                elif len(actual_ids) != 0:
+                    if previous_child.tag != child.tag or set(previous_ids) != set(actual_ids):
+                        result.append(html_to_json_improved(child))
                 else:
-                    values.append(element["tag"])
-                    extract(element, values)
+                    result.append(html_to_json_improved(child))
             else:
-                values.append(element["tag"])
-                extract(element, values)
-        if json["children"]:
-            values.append(")")
-        return values
+                result.append(html_to_json_improved(child))
+    return result
 
-    values.append(json["tag"])
-    values = extract(json, values)
-    return ' '.join(values)
+
+def filter_unwanted_tags_canonical(element):
+    if element and element.tag.upper() not in unwantedTags:
+        return element

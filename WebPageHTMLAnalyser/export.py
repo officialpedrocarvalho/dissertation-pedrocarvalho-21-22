@@ -1,10 +1,8 @@
-from datetime import datetime
-
 import xlsxwriter as xw
 
 
-def results_to_excel(data, offset, offset_increment, method):
-    file, page = __build_file(method)
+def results_to_excel(data, details, offset, offset_increment, method, website, nr_files):
+    file, page = __build_file(method, website, nr_files)
 
     __build_table_header(file, page, 0, method)
 
@@ -12,15 +10,15 @@ def results_to_excel(data, offset, offset_increment, method):
 
     __build_graphics(file, page)
 
+    __build_details(page, details)
+
     file.close()
 
+    print(f"Exported: {file.filename}")
 
-def __build_file(method):
-    now = datetime.now()
-    day = now.strftime("%d-%m-%Y")
-    time = now.strftime("%Hh%Mm%Ss")
 
-    file = xw.Workbook(f'{method}_{day}_{time}.xlsx')
+def __build_file(method, website, nr_files):
+    file = xw.Workbook(f'{method}_{website}_{nr_files}.xlsx')
     page = file.add_worksheet('Results')
     return file, page
 
@@ -86,3 +84,9 @@ def __build_graphics(file, page):
     chart.set_x_axis({'name': '=Results!$B$1'})
 
     page.insert_chart('N17', chart)
+
+
+def __build_details(page, details):
+    for row, line in enumerate(details):
+        for col, cell in enumerate(line):
+            page.write(row + 24, col, cell)

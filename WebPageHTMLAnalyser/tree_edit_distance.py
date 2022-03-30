@@ -3,7 +3,7 @@ from io import StringIO
 import lxml
 from apted import Config, APTED
 
-from utils import json_count_elements, html_to_json
+from utils import json_count_elements, html_to_json, html_to_json_improved
 
 
 class CustomConfig(Config):
@@ -21,6 +21,18 @@ def similarity_rate(file1, file2):
     tree1 = html_to_json(html1)
     html2 = lxml.html.parse(StringIO(file2)).find('body')
     tree2 = html_to_json(html2)
+    apted = APTED(tree1, tree2, CustomConfig())
+    matching = apted.compute_edit_distance()
+    count = json_count_elements(tree1, "tag", "children")
+    count += json_count_elements(tree2, "tag", "children")
+    return 1 - (matching / count)
+
+
+def similarity_rate_canonical(file1, file2):
+    html1 = lxml.html.parse(StringIO(file1)).find('body')
+    tree1 = html_to_json_improved(html1)
+    html2 = lxml.html.parse(StringIO(file2)).find('body')
+    tree2 = html_to_json_improved(html2)
     apted = APTED(tree1, tree2, CustomConfig())
     matching = apted.compute_edit_distance()
     count = json_count_elements(tree1, "tag", "children")
