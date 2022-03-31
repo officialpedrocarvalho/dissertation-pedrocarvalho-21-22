@@ -1,92 +1,98 @@
 import xlsxwriter as xw
 
 
-def results_to_excel(data, details, offset, offset_increment, method, website, nr_files):
-    file, page = __build_file(method, website, nr_files)
+class ExcelExporter(object):
 
-    __build_table_header(file, page, 0, method)
+    def __init__(self, data, details, offset, offset_increment, method, website, nr_files):
+        self.data = data
+        self.details = details
+        self.offset = offset
+        self.offset_increment = offset_increment
+        self.method = method
+        self.website = website
+        self.nr_files = nr_files
 
-    __build_table_body(page, data, 0, offset, offset_increment)
+    def results_to_excel(self):
+        self.__build_file()
 
-    __build_graphics(file, page)
+        self.__build_table_header(0)
 
-    __build_details(page, details)
+        self.__build_table_body(0)
 
-    file.close()
+        self.__build_graphics()
 
-    print(f"Exported: {file.filename}")
+        self.__build_details()
 
+        self.file.close()
 
-def __build_file(method, website, nr_files):
-    file = xw.Workbook(f'{method}_{website}_{nr_files}.xlsx')
-    page = file.add_worksheet('Results')
-    return file, page
+        print(f"Exported: {self.file.filename}")
 
+    def __build_file(self):
+        self.file = xw.Workbook(f'results/{self.method}_{self.website}_{self.nr_files}.xlsx')
+        self.page = self.file.add_worksheet('Results')
 
-def __build_table_header(file, page, row, method):
-    page.write(row, 0, "Method")
-    page.write(row, 1, "Threshold")
-    page.write(row, 2, "TP")
-    page.write(row, 3, "TN")
-    page.write(row, 4, "FP")
-    page.write(row, 5, "FN")
-    page.write(row, 6, "Sensitivity")
-    page.write(row, 7, "Specificity")
-    page.write(row, 8, "FP Rate")
-    page.write(row, 9, "FN Rate")
-    page.write(row, 10, "Youden Index")
-    page.write(row, 11, "Accuracy")
+    def __build_table_header(self, row):
+        self.page.write(row, 0, "Method")
+        self.page.write(row, 1, "Threshold")
+        self.page.write(row, 2, "TP")
+        self.page.write(row, 3, "TN")
+        self.page.write(row, 4, "FP")
+        self.page.write(row, 5, "FN")
+        self.page.write(row, 6, "Sensitivity")
+        self.page.write(row, 7, "Specificity")
+        self.page.write(row, 8, "FP Rate")
+        self.page.write(row, 9, "FN Rate")
+        self.page.write(row, 10, "Youden Index")
+        self.page.write(row, 11, "Accuracy")
 
-    merge_format = file.add_format({'align': 'center', 'valign': 'vcenter'})
-    page.merge_range('A2:A22', method, merge_format)
+        merge_format = self.file.add_format({'align': 'center', 'valign': 'vcenter'})
+        self.page.merge_range('A2:A22', self.method, merge_format)
 
+    def __build_table_body(self, row):
+        split_size = 4
+        aux_data = [self.data[x:x + split_size] for x in range(0, len(self.data), split_size)]
+        aux_offset = self.offset
+        for value in aux_data:
+            row += 1
 
-def __build_table_body(page, data, row, offset, offset_increment):
-    split_size = 4
-    data = [data[x:x + split_size] for x in range(0, len(data), split_size)]
-    for value in data:
-        row += 1
+            self.page.write(row, 1, aux_offset)
+            self.page.write(row, 2, value[0])
+            self.page.write(row, 3, value[1])
+            self.page.write(row, 4, value[2])
+            self.page.write(row, 5, value[3])
+            self.page.write(row, 6, f"=C{row + 1}/(C{row + 1}+F{row + 1})")
+            self.page.write(row, 7, f"=D{row + 1}/(D{row + 1}+E{row + 1})")
+            self.page.write(row, 8, f"=E{row + 1}/(E{row + 1}+D{row + 1})")
+            self.page.write(row, 9, f"=F{row + 1}/(F{row + 1}+C{row + 1})")
+            self.page.write(row, 10, f"=G{row + 1}+H{row + 1}-1")
+            self.page.write(row, 11, f"=(C{row + 1}+D{row + 1})/(C{row + 1}+D{row + 1}+E{row + 1}+F{row + 1})")
 
-        page.write(row, 1, offset)
-        page.write(row, 2, value[0])
-        page.write(row, 3, value[1])
-        page.write(row, 4, value[2])
-        page.write(row, 5, value[3])
-        page.write(row, 6, f"=C{row + 1}/(C{row + 1}+F{row + 1})")
-        page.write(row, 7, f"=D{row + 1}/(D{row + 1}+E{row + 1})")
-        page.write(row, 8, f"=E{row + 1}/(E{row + 1}+D{row + 1})")
-        page.write(row, 9, f"=F{row + 1}/(F{row + 1}+C{row + 1})")
-        page.write(row, 10, f"=G{row + 1}+H{row + 1}-1")
-        page.write(row, 11, f"=(C{row + 1}+D{row + 1})/(C{row + 1}+D{row + 1}+E{row + 1}+F{row + 1})")
+            aux_offset += self.offset_increment
 
-        offset += offset_increment
+    def __build_graphics(self):
+        chart = self.file.add_chart({'type': 'line'})
 
+        chart.add_series({'name': '=Results!$C$1', 'values': '=Results!$C$2:$C$22', 'marker': {'type': 'circle'},
+                          'categories': '=Results!$B$2:$B$22'})
+        chart.add_series({'name': '=Results!$D$1', 'values': '=Results!$D$2:$D$22', 'marker': {'type': 'circle'}})
+        chart.add_series({'name': '=Results!$E$1', 'values': '=Results!$E$2:$E$22', 'marker': {'type': 'circle'}})
+        chart.add_series({'name': '=Results!$F$1', 'values': '=Results!$F$2:$F$22', 'marker': {'type': 'circle'}})
 
-def __build_graphics(file, page):
-    chart = file.add_chart({'type': 'line'})
+        chart.set_x_axis({'name': '=Results!$B$1'})
 
-    chart.add_series({'name': '=Results!$C$1', 'values': '=Results!$C$2:$C$22', 'marker': {'type': 'circle'},
-                      'categories': '=Results!$B$2:$B$22'})
-    chart.add_series({'name': '=Results!$D$1', 'values': '=Results!$D$2:$D$22', 'marker': {'type': 'circle'}})
-    chart.add_series({'name': '=Results!$E$1', 'values': '=Results!$E$2:$E$22', 'marker': {'type': 'circle'}})
-    chart.add_series({'name': '=Results!$F$1', 'values': '=Results!$F$2:$F$22', 'marker': {'type': 'circle'}})
+        self.page.insert_chart('N2', chart)
 
-    chart.set_x_axis({'name': '=Results!$B$1'})
+        chart = self.file.add_chart({'type': 'line'})
 
-    page.insert_chart('N2', chart)
+        chart.add_series({'name': '=Results!$G$1', 'values': '=Results!$G$2:$G$22', 'marker': {'type': 'circle'},
+                          'categories': '=Results!$B$2:$B$22'})
+        chart.add_series({'name': '=Results!$H$1', 'values': '=Results!$H$2:$H$22', 'marker': {'type': 'circle'}})
 
-    chart = file.add_chart({'type': 'line'})
+        chart.set_x_axis({'name': '=Results!$B$1'})
 
-    chart.add_series({'name': '=Results!$G$1', 'values': '=Results!$G$2:$G$22', 'marker': {'type': 'circle'},
-                      'categories': '=Results!$B$2:$B$22'})
-    chart.add_series({'name': '=Results!$H$1', 'values': '=Results!$H$2:$H$22', 'marker': {'type': 'circle'}})
+        self.page.insert_chart('N17', chart)
 
-    chart.set_x_axis({'name': '=Results!$B$1'})
-
-    page.insert_chart('N17', chart)
-
-
-def __build_details(page, details):
-    for row, line in enumerate(details):
-        for col, cell in enumerate(line):
-            page.write(row + 24, col, cell)
+    def __build_details(self):
+        for row, line in enumerate(self.details):
+            for col, cell in enumerate(line):
+                self.page.write(row + 24, col, cell)
