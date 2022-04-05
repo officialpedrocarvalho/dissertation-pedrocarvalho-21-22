@@ -42,13 +42,6 @@ class WebPageSpecificationViewSet(ModelViewSet):
 
     # permission_classes = [permissions.IsAuthenticated]
 
-    def update(self, request, pk):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        structure = canonical_extraction(serializer.validated_data.get('pageStructure'))
-        print(structure)
-        return Response(status=status.HTTP_200_OK)
-
     def create(self, request):
         if not request.session.exists(request.session.session_key):
             request.session.create()
