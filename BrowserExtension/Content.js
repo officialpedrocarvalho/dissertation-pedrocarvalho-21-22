@@ -1,37 +1,4 @@
 const servicePath = "http://127.0.0.1:8000";
-const unwantedTags2 = [
-  "SCRIPT",
-  "LI",
-  "TD",
-  "TR",
-  "SPAN",
-  "B",
-  "STRONG",
-  "EM",
-  "MARK",
-  "SMALL",
-  "DEL",
-  "INS",
-  "SUB",
-  "SUP",
-  "STYLE",
-  "NOSCRIPT",
-];
-
-const unwantedTags = [
-  "SCRIPT",
-  "B",
-  "STRONG",
-  "EM",
-  "MARK",
-  "SMALL",
-  "DEL",
-  "INS",
-  "SUB",
-  "SUP",
-  "STYLE",
-  "NOSCRIPT",
-];
 
 /**
  * Function that returns only the domain from the URL.
@@ -66,48 +33,8 @@ function getQueryParams(url) {
  * @returns web page structure in JSON.
  */
 function getWebPageStructure() {
-  let structure = document.querySelector("body");
-  return element(structure);
+  return document.querySelector("body").outerHTML;
 }
-
-/**
- * Function that receives an HTML element and converts it to JSON. Specifies the element tag name and its elements children in an array.
- *
- * @param {*} e HTML element
- * @returns JSON element.
- */
-const element = (e) => ({
-  tag: e.tagName,
-  classes: extractAttributes(e.attributes, "class"),
-  id: extractAttributes(e.attributes, "id"),
-  children: Array.from(e.childNodes, node)
-    .filter(Boolean)
-    .filter(function (e) {
-      return !unwantedTags.includes(e["tag"]);
-    }),
-});
-
-/**
- * Function that receives an HTML element and according to its element type returns a JSON convertion.
- *
- * @param {*} e HTML element
- * @returns JSON element
- */
-const node = (e) => {
-  switch (e?.nodeType) {
-    case 1:
-      return element(e);
-  }
-};
-
-const extractAttributes = (e, a) => {
-  for (const [key, value] of Object.entries(e)) {
-    if (value.name == a) {
-      return value.value.split(" ");
-    }
-  }
-  return [];
-};
 
 /**
  * Function that makes a HTTP POST request to the Collect Data Service to save the collected data.
@@ -116,13 +43,10 @@ const extractAttributes = (e, a) => {
  */
 function saveData(data) {
   let http = new XMLHttpRequest();
-  http.open("PUT", servicePath + "/webPageSpecification/1", true);
+  http.open("POST", servicePath + "/webPageSpecification", true);
   http.setRequestHeader("Content-Type", "application/json");
   http.onload = function () {
-    if (this.status === 201) {
-      //console.log(this.response);
-    }
-    //console.log(this.response);
+    console.log(this.response);
   };
   http.onerror = function () {
     console.log(this);
@@ -133,43 +57,9 @@ function saveData(data) {
 /**
  * Event listner to detect whenever a new page is loaded or reloaded.
  */
-/*window.addEventListener("load", (event) => {
+window.addEventListener("load", (event) => {
   let url = getUrl(window.location.href);
   let queryParams = getQueryParams(window.location.href);
   let pageStructure = getWebPageStructure();
-  console.log(pageStructure)
   saveData({ url, queryParams, pageStructure });
-});*/
-
-window.onload = function afterWebPageLoad() {
-  setTimeout(function () {
-    console.log("SENT REUEST");
-    let url = getUrl(window.location.href);
-    let queryParams = getQueryParams(window.location.href);
-    let pageStructure = getWebPageStructure();
-    saveData({ url, queryParams, pageStructure });
-  }, 3000);
-};
-
-const tagName = (e) => {
-  switch (e?.nodeType) {
-    case 1:
-      return e.tagName;
-  }
-};
-
-function getPageStructure() {
-  return document.querySelector("body").outerHTML;
-  return Array.from(document.body.getElementsByTagName("*"), tagName).filter(
-    function (e) {
-      return ![].includes(e);
-    }
-  );
-}
-
-/*window.addEventListener("load", (event) => {
-  let url = getUrl(window.location.href);
-  let queryParams = getQueryParams(window.location.href);
-  let pageStructure = getPageStructure();
-  saveData({url,queryParams,pageStructure})
-});*/
+});
