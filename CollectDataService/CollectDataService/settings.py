@@ -24,8 +24,7 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
 APPEND_SLASH = False
 
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATIC_URL = '/staticfiles/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Application definition
 
