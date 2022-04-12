@@ -4,8 +4,9 @@
     "description": "Javascript extension to record user's usage data in web applications/sites related to urls, paths travelled, actions taken and pages structure.",
     "author": "Pedro Carvalho",
     "permissions": [
-        "activeTab"
+        "tabs"
     ],
+    "host_permissions": ["https://*/"],
     "version": "1.0.0",
     "action": {
         "default_popup": "popup.html",

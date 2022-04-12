@@ -1,4 +1,6 @@
+//const servicePath = "https://webpagematcher.herokuapp.com";
 const servicePath = "http://127.0.0.1:8000";
+let previousUrl = window.location.href;
 
 /**
  * Function that returns only the domain from the URL.
@@ -46,7 +48,7 @@ function saveData(data) {
   http.open("POST", servicePath + "/webPageSpecification", true);
   http.setRequestHeader("Content-Type", "application/json");
   http.onload = function () {
-    console.log(this.response);
+    console.log(this.status);
   };
   http.onerror = function () {
     console.log(this);
@@ -62,4 +64,18 @@ window.addEventListener("load", (event) => {
   let queryParams = getQueryParams(window.location.href);
   let pageStructure = getWebPageStructure();
   saveData({ url, queryParams, pageStructure });
+});
+
+/**
+ * Event listner to detect whenever a new page is loaded or reloaded.
+ */
+window.addEventListener("click", (event) => {
+  href = window.location.href;
+  if (href !== previousUrl) {
+    previousUrl = href;
+    let url = getUrl(window.location.href);
+    let queryParams = getQueryParams(window.location.href);
+    let pageStructure = getWebPageStructure();
+    saveData({ url, queryParams, pageStructure });
+  }
 });

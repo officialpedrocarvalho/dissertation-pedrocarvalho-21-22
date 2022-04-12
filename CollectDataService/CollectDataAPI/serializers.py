@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from CollectDataAPI.models import WebPage, WebSite, Domain, WebPageSpecification
+from CollectDataAPI.models import WebPageIdentifier, WebSite, Domain, WebPage
 
 
 class WebSiteSerializer(ModelSerializer):
@@ -15,13 +15,13 @@ class DomainSerializer(ModelSerializer):
         fields = ['domain', 'webSite']
 
 
+class WebPageIdentifierSerializer(ModelSerializer):
+    class Meta:
+        model = WebPageIdentifier
+        fields = ['pageStructure']
+
+
 class WebPageSerializer(ModelSerializer):
     class Meta:
         model = WebPage
-        fields = ['webSite', 'pageStructure']
-
-
-class WebPageSpecificationSerializer(ModelSerializer):
-    class Meta:
-        model = WebPageSpecification
         fields = ['url', 'queryParams', 'pageStructure']

@@ -12,15 +12,16 @@ class Domain(models.Model):
     domain = models.URLField(unique=True)
 
 
-class WebPage(models.Model):
-    webSite = models.ForeignKey(WebSite, on_delete=models.CASCADE, to_field='name')
+class WebPageIdentifier(models.Model):
     pageStructure = models.JSONField()
 
 
-class WebPageSpecification(models.Model):
-    webPage = models.ForeignKey(WebPage, on_delete=models.CASCADE)
+class WebPage(models.Model):
+    webSite = models.ForeignKey(WebSite, on_delete=models.CASCADE, to_field='name')
+    webPageIdentifier = models.ForeignKey(WebPageIdentifier, on_delete=models.CASCADE, null=True, blank=True)
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
     url = models.URLField()
     queryParams = ArrayField(models.CharField(max_length=100, null=True, blank=True), null=True, blank=True)
     pageStructure = models.JSONField()
-    similarity = models.DecimalField(decimal_places=2, max_digits=3)
+    similarity = models.DecimalField(decimal_places=2, max_digits=3, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
