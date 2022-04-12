@@ -25,9 +25,6 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 APPEND_SLASH = False
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
 STATIC_ROOT = BASE_DIR / "static"
 
 # Application definition
