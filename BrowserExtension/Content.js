@@ -45,7 +45,7 @@ function getWebPageStructure() {
  */
 function saveData(data) {
   let http = new XMLHttpRequest();
-  http.open("POST", servicePath + "/webPageSpecification", true);
+  http.open("POST", servicePath + "/webPage", true);
   http.setRequestHeader("Content-Type", "application/json");
   http.onload = function () {
     console.log(this.status);

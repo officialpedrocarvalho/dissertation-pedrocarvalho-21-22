@@ -28,22 +28,23 @@ class DomainViewSet(ModelViewSet):
     serializer_class = DomainSerializer
 
 
-class WebPageSpecificationViewSet(ModelViewSet):
+class WebPageViewSet(ModelViewSet):
     """
-    API endpoint that allows WebPageSpecifications to be viewed or edited.
+    API endpoint that allows WebPages to be viewed or edited.
     """
     queryset = WebPage.objects.all()
     serializer_class = WebPageSerializer
 
     def create(self, request):
+        print(request.session.session_key)
+        if not request.session.exists(request.session.session_key):
+            request.session.create()
+        session = Session.objects.get(session_key=request.session.session_key)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         url = split_by_character_in_position(serializer.validated_data.get('url'), "/", 3)
         domain = Domain.objects.filter(domain=url).first()
         if domain:
-            if not request.session.exists(request.session.session_key):
-                request.session.create()
-            session = Session.objects.get(session_key=request.session.session_key)
             web_site = domain.webSite
             serializer.save(session=session, webSite=web_site)
             headers = self.get_success_headers(serializer.data)
