@@ -46,12 +46,13 @@ function getWebPageStructure() {
 function saveData(data) {
   let http = new XMLHttpRequest();
   http.open("POST", servicePath + "/webPage", true);
+  http.withCredentials = true;
   http.setRequestHeader("Content-Type", "application/json");
   http.onload = function () {
-    console.log(this.status);
+    console.log("SUCCESS", this.status);
   };
   http.onerror = function () {
-    console.log(this);
+    console.log(this.status);
   };
   http.send(JSON.stringify(data));
 }

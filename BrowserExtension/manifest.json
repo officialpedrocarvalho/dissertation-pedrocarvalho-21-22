@@ -3,17 +3,24 @@
     "name": "Web Scraper",
     "description": "Javascript extension to record user's usage data in web applications/sites related to urls, paths travelled, actions taken and pages structure.",
     "author": "Pedro Carvalho",
-    "permissions": [
-        "tabs"
+    "host_permissions": [
+        "*://*/",
+        "http://*/",
+        "https://*/",
+        "http://127.0.0.1:8000/"
     ],
-    "host_permissions": ["https://*/"],
+    "permissions": [
+        "tabs",
+        "cookies",
+        "storage"
+    ],
     "version": "1.0.0",
     "action": {
         "default_popup": "popup.html",
         "default_title": "Web Scraper",
         "default_icon": {
             "16": "img/icon16.png",
-            "24": "img/icon24.png", 
+            "24": "img/icon24.png",
             "32": "img/icon32.png"
         }
     },
