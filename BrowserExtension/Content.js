@@ -5,28 +5,10 @@ let previousUrl = window.location.href;
 /**
  * Function that returns only the domain from the URL.
  *
- * @param {array} url contains domain and query parameters
  * @returns URL's domain
  */
-function getUrl(url) {
-  url = url.split("?");
-  return url[0];
-}
-
-/**
- * Function that returns only the name of the query parameters from the URL, removing the values.
- *
- * @param {array} url contains domain and query parameters
- * @returns URL's query parameters names
- */
-function getQueryParams(url) {
-  url = url.split("?");
-  let queryParams = url[1] ? url[1].split("&") : null;
-  if (!queryParams) return queryParams;
-  for (let index = 0; index < queryParams.length; index++) {
-    queryParams[index] = queryParams[index].split("=")[0];
-  }
-  return queryParams;
+function getUrl() {
+  return window.location.href;
 }
 
 /**
@@ -35,7 +17,7 @@ function getQueryParams(url) {
  * @returns web page structure in JSON.
  */
 function getWebPageStructure() {
-  return document.querySelector("body").outerHTML;
+  return document.documentElement.outerHTML;
 }
 
 /**
@@ -61,22 +43,19 @@ function saveData(data) {
  * Event listner to detect whenever a new page is loaded or reloaded.
  */
 window.addEventListener("load", (event) => {
-  let url = getUrl(window.location.href);
-  let queryParams = getQueryParams(window.location.href);
+  let url = getUrl();
   let pageStructure = getWebPageStructure();
-  saveData({ url, queryParams, pageStructure });
+  saveData({ url, pageStructure });
 });
 
 /**
  * Event listner to detect whenever a new page is loaded or reloaded.
  */
 window.addEventListener("click", (event) => {
-  href = window.location.href;
-  if (href !== previousUrl) {
-    previousUrl = href;
-    let url = getUrl(window.location.href);
-    let queryParams = getQueryParams(window.location.href);
+  let url = getUrl();
+  if (url !== previousUrl) {
+    previousUrl = url;
     let pageStructure = getWebPageStructure();
-    saveData({ url, queryParams, pageStructure });
+    saveData({ url, pageStructure });
   }
 });

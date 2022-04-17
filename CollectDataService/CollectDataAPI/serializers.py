@@ -1,4 +1,7 @@
+from pprint import pprint
+
 from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
 
 from CollectDataAPI.models import WebPageIdentifier, WebSite, Domain, WebPage
 
@@ -16,12 +19,31 @@ class DomainSerializer(ModelSerializer):
 
 
 class WebPageIdentifierSerializer(ModelSerializer):
+    def validate(self, attrs):
+        if attrs['similarityMethod'] not in [c[0] for c in WebPageIdentifier.SimilarityMethods.choices]:
+            raise serializers.ValidationError("Similarity method does not exist")
+        return attrs
+
     class Meta:
         model = WebPageIdentifier
-        fields = ['pageStructure']
+        fields = ['similarityMethod', ]
 
 
 class WebPageSerializer(ModelSerializer):
     class Meta:
         model = WebPage
-        fields = ['url', 'queryParams', 'pageStructure']
+        fields = ['url', 'pageStructure']
+
+
+class WebPageListSerializer(ModelSerializer):
+    class Meta:
+        model = WebPage
+        fields = ['url']
+
+
+class WebPageIdentifierListSerializer(ModelSerializer):
+    webPages = WebPageListSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = WebPageIdentifier
+        fields = ['pk', 'similarityMethod', 'webPages']
