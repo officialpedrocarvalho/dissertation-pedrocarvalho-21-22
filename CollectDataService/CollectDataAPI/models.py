@@ -1,10 +1,8 @@
-from django.contrib.postgres.fields import ArrayField
 from django.contrib.sessions.models import Session
 from django.db import models
 from html_matcher import LongestCommonSequence, LongestCommonSequenceOptimized, AllPathTreeEditDistance, \
     AllPathTreeEditDistanceOptimized
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 
 
 class WebSite(models.Model):
