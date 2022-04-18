@@ -25,7 +25,7 @@ class WebSiteViewSet(ModelViewSet):
         method = request.query_params.get('method')
         identifier = WebPageIdentifierSerializer(data={'similarityMethod': method})
         identifier.is_valid(raise_exception=True)
-        algorithm = MixedSimilarity(WebPageIdentifier(identifier).get_similarity_method(), StyleSimilarity(), 0.7)
+        algorithm = MixedSimilarity(WebPageIdentifier(method).get_similarity_method(), StyleSimilarity(), 0.7)
         for web_page in web_site.webpage_set.all():
             found = False
             similarity_level = 0.0
