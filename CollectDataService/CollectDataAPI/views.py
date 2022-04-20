@@ -1,6 +1,6 @@
 from django.contrib.sessions.models import Session
 from django.http import HttpResponseBadRequest
-from html_matcher import StyleSimilarity, MixedSimilarity
+from html_matcher import StyleSimilarity, MixedSimilarity, LongestCommonSequenceOptimized
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -25,20 +25,21 @@ class WebSiteViewSet(ModelViewSet):
         method = request.query_params.get('method')
         identifier = WebPageIdentifierSerializer(data={'similarityMethod': method})
         identifier.is_valid(raise_exception=True)
-        algorithm = MixedSimilarity(WebPageIdentifier(method).get_similarity_method(), StyleSimilarity(), 0.7)
+        algorithm = MixedSimilarity(WebPageIdentifier(similarityMethod=method).get_similarity_method(),
+                                    StyleSimilarity(), 0.7)
         for web_page in web_site.webpage_set.all():
             found = False
-            similarity_level = 0.0
             identifiers = WebPageIdentifier.objects.filter(webPages__webSite=web_site, similarityMethod=method)
             for identifier in identifiers:
                 if Matching.objects.filter(webPage=web_page, webPageIdentifier=identifier):
                     found = True
                     break
                 matching = algorithm.similarity(web_page.pageStructure, identifier.pageStructure)
-                if matching >= 0.9 and matching > similarity_level:
-                    similarity_level = matching
+                print(matching, web_page.url, identifier.webPages.all().first().url)
+                if matching >= 0.9:
                     found = True
                     Matching.objects.create(webPageIdentifier=identifier, webPage=web_page, similarity=matching)
+                    break
             if not found:
                 new = WebPageIdentifier.objects.create(pageStructure=web_page.pageStructure, similarityMethod=method)
                 Matching.objects.create(webPageIdentifier=new, webPage=web_page, similarity=1.0)

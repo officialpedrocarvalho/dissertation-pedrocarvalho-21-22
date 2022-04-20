@@ -43,19 +43,49 @@ function saveData(data) {
  * Event listner to detect whenever a new page is loaded or reloaded.
  */
 window.addEventListener("load", (event) => {
-  let url = getUrl();
-  let pageStructure = getWebPageStructure();
-  saveData({ url, pageStructure });
+  activateLoaderProtection();
+  setTimeout(function () {
+    let url = getUrl();
+    let pageStructure = getWebPageStructure();
+    saveData({ url, pageStructure });
+    deactivateLoaderProtection();
+  }, 1000);
 });
 
 /**
  * Event listner to detect whenever a new page is loaded or reloaded.
  */
 window.addEventListener("click", (event) => {
-  let url = getUrl();
-  if (url !== previousUrl) {
-    previousUrl = url;
-    let pageStructure = getWebPageStructure();
-    saveData({ url, pageStructure });
+  if (event.target.id != "my-protector-pedro-carvalho" && event.target.id != "my-spinner-pedro-carvalho") {
+    setTimeout(function () {
+      let url = getUrl();
+      if (url !== previousUrl) {
+        activateLoaderProtection();
+        setTimeout(function () {
+          let url = getUrl();
+          previousUrl = url;
+          let pageStructure = getWebPageStructure();
+          saveData({ url, pageStructure });
+          deactivateLoaderProtection();
+        }, 1000);
+      }
+    }, 200);
   }
 });
+
+function activateLoaderProtection() {
+  let protector = document.createElement("div");
+  protector.id = "my-protector-pedro-carvalho";
+  protector.classList.add("my-protector-pedro-carvalho");
+  let spinner = document.createElement("div");
+  spinner.id = "my-spinner-pedro-carvalho";
+  spinner.classList.add("my-spinner-pedro-carvalho");
+  protector.appendChild(spinner);
+  let body = document.querySelector("body");
+  body.parentNode.insertBefore(protector, body);
+}
+
+function deactivateLoaderProtection() {
+  let protector = document.querySelector("#my-protector-pedro-carvalho");
+  protector.remove();
+}
