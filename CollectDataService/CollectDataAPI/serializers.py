@@ -3,7 +3,7 @@ from pprint import pprint
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 
-from CollectDataAPI.models import WebPageIdentifier, WebSite, Domain, WebPage
+from CollectDataAPI.models import WebPageIdentifier, WebSite, Domain, WebPage, Matching, Sequence
 
 
 class WebSiteSerializer(ModelSerializer):
@@ -47,3 +47,9 @@ class WebPageIdentifierListSerializer(ModelSerializer):
     class Meta:
         model = WebPageIdentifier
         fields = ['pk', 'similarityMethod', 'webPages']
+
+
+class SequenceSerializer(ModelSerializer):
+    class Meta:
+        model = Sequence
+        fields = ['webPageIdentifier']

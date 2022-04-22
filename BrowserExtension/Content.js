@@ -49,7 +49,7 @@ window.addEventListener("load", (event) => {
     let pageStructure = getWebPageStructure();
     saveData({ url, pageStructure });
     deactivateLoaderProtection();
-  }, 1000);
+  }, 2000);
 });
 
 /**
@@ -67,7 +67,7 @@ window.addEventListener("click", (event) => {
           let pageStructure = getWebPageStructure();
           saveData({ url, pageStructure });
           deactivateLoaderProtection();
-        }, 1000);
+        }, 2000);
       }
     }, 200);
   }

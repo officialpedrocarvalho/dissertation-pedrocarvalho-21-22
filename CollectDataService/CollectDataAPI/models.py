@@ -52,3 +52,7 @@ class Matching(models.Model):
     webPageIdentifier = models.ForeignKey(WebPageIdentifier, on_delete=models.CASCADE)
     similarity = models.DecimalField(decimal_places=2, max_digits=3)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Sequence(models.Model):
+    webPageIdentifier = models.ManyToManyField(WebPageIdentifier)
