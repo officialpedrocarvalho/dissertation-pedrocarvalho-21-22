@@ -6,7 +6,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from CollectDataAPI.models import WebSite, WebPage, Domain, WebPageIdentifier, Matching, Sequence
+from CollectDataAPI.models import WebSite, WebPage, Domain, WebPageIdentifier, WebPageIdentifierWebPage, Sequence, \
+    SequenceIdentifier
 from CollectDataAPI.serializers import WebSiteSerializer, WebPageSerializer, \
     DomainSerializer, WebPageIdentifierSerializer, WebPageIdentifierListSerializer, SequenceSerializer
 from CollectDataAPI.utils import split_by_character_in_position
@@ -27,18 +28,20 @@ class WebSiteViewSet(ModelViewSet):
         identifier.is_valid(raise_exception=True)
         algorithm = MixedSimilarity(WebPageIdentifier(similarityMethod=method).get_similarity_method(),
                                     StyleSimilarity(), 0.7)
-        for web_page in web_site.webpage_set.all().exclude(matching__webPageIdentifier__similarityMethod=method):
+        for web_page in web_site.webpage_set.all().exclude(
+                webpageidentifierwebpage__webPageIdentifier__similarityMethod=method):
             found = False
             for identifier in WebPageIdentifier.objects.filter(webPages__webSite=web_site, similarityMethod=method):
                 matching = algorithm.similarity(web_page.pageStructure, identifier.pageStructure)
                 print(matching, web_page.url, identifier.webPages.all().first().url)
                 if matching >= 0.9:
                     found = True
-                    Matching.objects.create(webPageIdentifier=identifier, webPage=web_page, similarity=matching)
+                    WebPageIdentifierWebPage.objects.create(webPageIdentifier=identifier, webPage=web_page,
+                                                            similarity=matching)
                     break
             if not found:
                 new = WebPageIdentifier.objects.create(pageStructure=web_page.pageStructure, similarityMethod=method)
-                Matching.objects.create(webPageIdentifier=new, webPage=web_page, similarity=1.0)
+                WebPageIdentifierWebPage.objects.create(webPageIdentifier=new, webPage=web_page, similarity=1.0)
         identifiers = WebPageIdentifier.objects.filter(webPages__webSite=web_site, similarityMethod=method).distinct()
         serializer = WebPageIdentifierListSerializer(identifiers, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK, headers=self.get_success_headers(serializer.data))
@@ -49,18 +52,18 @@ class WebSiteViewSet(ModelViewSet):
         method = request.query_params.get('method')
         identifier = WebPageIdentifierSerializer(data={'similarityMethod': method})
         identifier.is_valid(raise_exception=True)
-        sequences = Matching.objects.filter(webPage__webSite=web_site, webPageIdentifier__similarityMethod=method)
-        values = list(sequences.values_list("webPage__session_id", flat=True).distinct())
+        matches = WebPageIdentifierWebPage.objects.filter(webPage__webSite=web_site,
+                                                          webPageIdentifier__similarityMethod=method)
+        sessions = list(matches.values_list("webPage__session_id", flat=True).distinct())
         Sequence.objects.all().delete()
-        sub_sequences = []
-        for value in values:
+        sequences = []
+        for session in sessions:
             sequence = Sequence.objects.create()
-            for aux in sequences.order_by("webPage__created_at"):
-                if aux.webPage.session.session_key == value:
-                    sequence.webPageIdentifier.add(aux.webPageIdentifier)
-            sub_sequences.append(sequence)
-        serializer = SequenceSerializer(sub_sequences, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+            for matching in matches.order_by("webPage__created_at"):
+                if matching.webPage.session.session_key == session:
+                    SequenceIdentifier.objects.create(webPageIdentifier=matching.webPageIdentifier, sequence=sequence)
+            sequences.append(sequence)
+        return Response(SequenceSerializer(sequences, many=True).data, status=status.HTTP_200_OK)
 
 
 class DomainViewSet(ModelViewSet):

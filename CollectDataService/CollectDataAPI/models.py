@@ -29,7 +29,7 @@ class WebPageIdentifier(models.Model):
         LCS_OPTIMIZED = '3', 'LCS_Optimized'
         APTED_OPTIMIZED = '4', 'APTED_Optimized'
 
-    webPages = models.ManyToManyField(WebPage, through='Matching')
+    webPages = models.ManyToManyField(WebPage, through='WebPageIdentifierWebPage')
     pageStructure = models.TextField()
     similarityMethod = models.CharField(max_length=2, choices=SimilarityMethods.choices,
                                         default=SimilarityMethods.LCS_OPTIMIZED)
@@ -47,7 +47,7 @@ class WebPageIdentifier(models.Model):
             raise serializers.ValidationError("Similarity method does not exist")
 
 
-class Matching(models.Model):
+class WebPageIdentifierWebPage(models.Model):
     webPage = models.ForeignKey(WebPage, on_delete=models.CASCADE)
     webPageIdentifier = models.ForeignKey(WebPageIdentifier, on_delete=models.CASCADE)
     similarity = models.DecimalField(decimal_places=2, max_digits=3)
@@ -55,4 +55,10 @@ class Matching(models.Model):
 
 
 class Sequence(models.Model):
-    webPageIdentifier = models.ManyToManyField(WebPageIdentifier)
+    webPageIdentifiers = models.ManyToManyField(WebPageIdentifier, through='SequenceIdentifier')
+
+
+class SequenceIdentifier(models.Model):
+    sequence = models.ForeignKey(Sequence, on_delete=models.CASCADE)
+    webPageIdentifier = models.ForeignKey(WebPageIdentifier, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
