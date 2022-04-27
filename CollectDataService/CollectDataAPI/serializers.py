@@ -52,4 +52,4 @@ class WebPageIdentifierListSerializer(ModelSerializer):
 class SequenceSerializer(ModelSerializer):
     class Meta:
         model = Sequence
-        fields = ['webPageIdentifiers']
+        fields = ['support', 'webPageIdentifiers']

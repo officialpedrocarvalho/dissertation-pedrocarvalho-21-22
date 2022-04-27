@@ -56,6 +56,28 @@ class WebPageIdentifierWebPage(models.Model):
 
 class Sequence(models.Model):
     webPageIdentifiers = models.ManyToManyField(WebPageIdentifier, through='SequenceIdentifier')
+    support = models.IntegerField(blank=True, null=True)
+
+    def get_subsequences(self, length):
+        """Returns the sub-sequences of the given length as tuples"""
+        sequence = list(self.webPageIdentifiers.all()[0:length])
+        inst = Sequence.objects.create()
+        inst.webPageIdentifiers.set(WebPageIdentifier.objects.filter(id__in={instance.id for instance in sequence}))
+        yield inst
+        while length < len(self.webPageIdentifiers.all()):
+            sequence.pop(0)
+            sequence.append(self.webPageIdentifiers.all()[length])
+            length += 1
+            inst = Sequence.objects.create()
+            inst.webPageIdentifiers.set(WebPageIdentifier.objects.filter(id__in={instance.id for instance in sequence}))
+            yield inst
+
+    def get_subsequences_gte(self, min_length):
+        """Returns all sub-sequences >= the given length"""
+        while min_length <= len(self.webPageIdentifiers.all()):
+            for subsequence in self.get_subsequences(min_length):
+                yield subsequence
+            min_length += 1
 
 
 class SequenceIdentifier(models.Model):
