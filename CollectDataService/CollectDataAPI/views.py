@@ -1,3 +1,5 @@
+import itertools
+
 from django.contrib.sessions.models import Session
 from django.shortcuts import get_object_or_404
 from html_matcher import StyleSimilarity, MixedSimilarity
@@ -5,7 +7,6 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from spmf import Spmf
 
 from CollectDataAPI.models import WebSite, WebPage, Domain, WebPageIdentifier, WebPageIdentifierWebPage, Sequence, \
     SequenceIdentifier
@@ -14,16 +15,16 @@ from CollectDataAPI.serializers import WebSiteSerializer, WebPageSerializer, \
 from CollectDataAPI.utils import split_by_character_in_position, get_subsequences_gte
 
 
-def create_identifiers(web_site, method):
+def create_identifiers(web_site, method, weight, similarity_offset):
     algorithm = MixedSimilarity(WebPageIdentifier(similarityMethod=method).get_similarity_method(),
-                                StyleSimilarity(), 0.7)
+                                StyleSimilarity(), weight)
     for web_page in web_site.webpage_set.all().exclude(
             webpageidentifierwebpage__webPageIdentifier__similarityMethod=method):
         found = False
         for identifier in WebPageIdentifier.objects.filter(webPages__webSite=web_site, similarityMethod=method):
             matching = algorithm.similarity(web_page.pageStructure, identifier.pageStructure)
             print(matching, web_page.url, identifier.webPages.all().first().url)
-            if matching >= 0.9:
+            if matching >= similarity_offset:
                 found = True
                 WebPageIdentifierWebPage.objects.create(webPageIdentifier=identifier, webPage=web_page,
                                                         similarity=matching)
@@ -63,6 +64,16 @@ def build_sub_sequences(sequences, min_length, min_support):
     return [get_sequence(k, v) for k, v in count_sequences.items() if float(v) >= min_support]
 
 
+def get_significant_sub_sequences(sub_sequences):
+    significant_sub_sequences = [sequence for sequence in sub_sequences]
+    for a, b in itertools.combinations(sub_sequences, 2):
+        if set(a.webPageIdentifiers.all()).issubset(b.webPageIdentifiers.all()):
+            significant_sub_sequences.remove(a) if a in significant_sub_sequences else None
+        elif set(b.webPageIdentifiers.all()).issubset(a.webPageIdentifiers.all()):
+            significant_sub_sequences.remove(b) if b in significant_sub_sequences else None
+    return significant_sub_sequences
+
+
 class WebSiteViewSet(ModelViewSet):
     """
     API endpoint that allows WebSites to be viewed or edited.
@@ -74,9 +85,11 @@ class WebSiteViewSet(ModelViewSet):
     def create_web_page_similarity_ids(self, request, pk=None):
         web_site = self.get_object()
         method = request.query_params.get('method')
+        weight = float(request.query_params.get('weight'))
+        similarity_offset = float(request.query_params.get('offset'))
         identifier = WebPageIdentifierSerializer(data={'similarityMethod': method})
         identifier.is_valid(raise_exception=True)
-        identifiers = create_identifiers(web_site, method)
+        identifiers = create_identifiers(web_site, method, weight, similarity_offset)
         serializer = WebPageIdentifierListSerializer(identifiers, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK, headers=self.get_success_headers(serializer.data))
 
@@ -90,21 +103,9 @@ class WebSiteViewSet(ModelViewSet):
         identifier.is_valid(raise_exception=True)
         sequences = build_sequences(web_site, method)
         sub_sequences = build_sub_sequences(sequences, length, support)
+        #significant_sub_sequences = get_significant_sub_sequences(sub_sequences)
         serializer = SequenceSerializer(sub_sequences, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK, headers=self.get_success_headers(serializer.data))
-
-    @action(detail=True, methods=['post'], url_path='webPage/testing')
-    def testing(self, request, pk=None):
-        input_direct = [
-            [[1], [2], [3], [4], [9], [7], [8], [1], [4], [6]],
-            [[1], [2], [3], [4], [5], [4], [6], [7], [8]],
-            [[1], [2], [3], [4], [6], [8], [3], [7], [4]],
-            [[1], [2], [3], [5], [4], [7], [8], [6], [9]],
-            [[1], [2], [4], [5], [9], [7], [6], [7], [8]]
-        ]
-        spmf = Spmf("PrefixSpan", input_direct=input_direct, output_filename="output.txt", arguments=[0.7])
-        spmf.run()
-        return Response(status=status.HTTP_200_OK)
 
 
 class DomainViewSet(ModelViewSet):
