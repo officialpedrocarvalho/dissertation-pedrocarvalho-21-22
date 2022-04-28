@@ -52,11 +52,11 @@ def build_sequences(web_site, method):
 
 def get_sequence(identifiers, support):
     sequence = Sequence.objects.create(support=support)
-    sequence.webPageIdentifiers.set(identifiers)
+    [SequenceIdentifier.objects.create(webPageIdentifier=identifier, sequence=sequence) for identifier in identifiers]
     return sequence
 
 
-def build_sub_sequences(sequences, min_length, min_support):
+def build_subsequences(sequences, min_length, min_support):
     count_sequences = dict()
     for sequence in sequences:
         for sub_sequence in get_subsequences_gte(sequence.webPageIdentifiers.all(), min_length):
@@ -64,14 +64,23 @@ def build_sub_sequences(sequences, min_length, min_support):
     return [get_sequence(k, v) for k, v in count_sequences.items() if float(v) >= min_support]
 
 
-def get_significant_sub_sequences(sub_sequences):
-    significant_sub_sequences = [sequence for sequence in sub_sequences]
-    for a, b in itertools.combinations(sub_sequences, 2):
-        if set(a.webPageIdentifiers.all()).issubset(b.webPageIdentifiers.all()):
-            significant_sub_sequences.remove(a) if a in significant_sub_sequences else None
-        elif set(b.webPageIdentifiers.all()).issubset(a.webPageIdentifiers.all()):
-            significant_sub_sequences.remove(b) if b in significant_sub_sequences else None
-    return significant_sub_sequences
+def contains_subsequence(subsequence, sequence):
+    return any(list(sequence[pos:pos + len(subsequence)]) == list(subsequence) for pos in
+               range(0, len(sequence) - len(subsequence) + 1))
+
+
+def get_significant_subsequences(subsequences):
+    insignificant_subsequences = []
+    significant_subsequences = [sequence for sequence in subsequences]
+    for a, b in itertools.combinations(subsequences, 2):
+        if a not in insignificant_subsequences and b not in insignificant_subsequences:
+            if contains_subsequence(a.webPageIdentifiers.all(), b.webPageIdentifiers.all()):
+                significant_subsequences.remove(a) if a in significant_subsequences else None
+                insignificant_subsequences.append(a)
+            elif contains_subsequence(b.webPageIdentifiers.all(), a.webPageIdentifiers.all()):
+                significant_subsequences.remove(b) if b in significant_subsequences else None
+                insignificant_subsequences.append(b)
+    return significant_subsequences
 
 
 class WebSiteViewSet(ModelViewSet):
@@ -102,9 +111,9 @@ class WebSiteViewSet(ModelViewSet):
         identifier = WebPageIdentifierSerializer(data={'similarityMethod': method})
         identifier.is_valid(raise_exception=True)
         sequences = build_sequences(web_site, method)
-        sub_sequences = build_sub_sequences(sequences, length, support)
-        #significant_sub_sequences = get_significant_sub_sequences(sub_sequences)
-        serializer = SequenceSerializer(sub_sequences, many=True)
+        subsequences = build_subsequences(sequences, length, support)
+        significant_subsequences = get_significant_subsequences(subsequences)
+        serializer = SequenceSerializer(significant_subsequences, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK, headers=self.get_success_headers(serializer.data))
 
 
