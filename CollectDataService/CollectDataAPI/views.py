@@ -1,6 +1,7 @@
 import itertools
 
 from django.contrib.sessions.models import Session
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from html_matcher import StyleSimilarity, MixedSimilarity
 from rest_framework import status
@@ -70,16 +71,22 @@ def contains_subsequence(subsequence, sequence):
 
 
 def get_significant_subsequences(subsequences):
+    subsequences = list(Sequence.objects.filter(id__in={instance.id for instance in subsequences}).annotate(
+        count=Count('webPageIdentifiers')).order_by('-count'))
     insignificant_subsequences = []
-    significant_subsequences = [sequence for sequence in subsequences]
-    for a, b in itertools.combinations(subsequences, 2):
-        if a not in insignificant_subsequences and b not in insignificant_subsequences:
-            if contains_subsequence(a.webPageIdentifiers.all(), b.webPageIdentifiers.all()):
-                significant_subsequences.remove(a) if a in significant_subsequences else None
-                insignificant_subsequences.append(a)
-            elif contains_subsequence(b.webPageIdentifiers.all(), a.webPageIdentifiers.all()):
-                significant_subsequences.remove(b) if b in significant_subsequences else None
-                insignificant_subsequences.append(b)
+    for i in range(len(subsequences)):
+        if subsequences[i] in insignificant_subsequences:
+            continue
+        for j in range(i + 1, len(subsequences)):
+            if subsequences[j] in insignificant_subsequences:
+                continue
+            if contains_subsequence(subsequences[i].webPageIdentifiers.all(), subsequences[j].webPageIdentifiers.all()):
+                insignificant_subsequences.append(subsequences[i])
+            elif contains_subsequence(subsequences[j].webPageIdentifiers.all(),
+                                      subsequences[i].webPageIdentifiers.all()):
+                insignificant_subsequences.append(subsequences[j])
+    significant_subsequences = [subsequence for subsequence in subsequences if
+                                subsequence not in insignificant_subsequences]
     return significant_subsequences
 
 
@@ -111,8 +118,11 @@ class WebSiteViewSet(ModelViewSet):
         identifier = WebPageIdentifierSerializer(data={'similarityMethod': method})
         identifier.is_valid(raise_exception=True)
         sequences = build_sequences(web_site, method)
+        print("1")
         subsequences = build_subsequences(sequences, length, support)
+        print("2")
         significant_subsequences = get_significant_subsequences(subsequences)
+        print("3")
         serializer = SequenceSerializer(significant_subsequences, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK, headers=self.get_success_headers(serializer.data))
 
