@@ -53,10 +53,31 @@ window.addEventListener("load", (event) => {
 });
 
 /**
- * Event listner to detect whenever a new page is loaded or reloaded.
+ * Event listner to detect whenever a click with the mouse occurs.
  */
 window.addEventListener("click", (event) => {
   if (event.target.id != "my-protector-pedro-carvalho" && event.target.id != "my-spinner-pedro-carvalho") {
+    setTimeout(function () {
+      let url = getUrl();
+      if (url !== previousUrl) {
+        activateLoaderProtection();
+        setTimeout(function () {
+          let url = getUrl();
+          previousUrl = url;
+          let pageStructure = getWebPageStructure();
+          saveData({ url, pageStructure });
+          deactivateLoaderProtection();
+        }, 1500);
+      }
+    }, 200);
+  }
+});
+
+/**
+ * Event listner to detect whenever a enter with the keyboard occurs.
+ */
+ window.addEventListener("keypress", (event) => {
+  if (event.key === 'Enter') {
     setTimeout(function () {
       let url = getUrl();
       if (url !== previousUrl) {

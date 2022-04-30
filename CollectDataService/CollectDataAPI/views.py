@@ -66,8 +66,9 @@ def build_subsequences(sequences, min_length, min_support):
 
 
 def contains_subsequence(subsequence, sequence):
-    return any(list(sequence[pos:pos + len(subsequence)]) == list(subsequence) for pos in
-               range(0, len(sequence) - len(subsequence) + 1))
+    sub = "".join(map(str, subsequence.values_list("pk", flat=True)))
+    seq = "".join(map(str, sequence.values_list("pk", flat=True)))
+    return sub in seq
 
 
 def get_significant_subsequences(subsequences):
@@ -85,9 +86,7 @@ def get_significant_subsequences(subsequences):
             elif contains_subsequence(subsequences[j].webPageIdentifiers.all(),
                                       subsequences[i].webPageIdentifiers.all()):
                 insignificant_subsequences.append(subsequences[j])
-    significant_subsequences = [subsequence for subsequence in subsequences if
-                                subsequence not in insignificant_subsequences]
-    return significant_subsequences
+    return [subsequence for subsequence in subsequences if subsequence not in insignificant_subsequences]
 
 
 class WebSiteViewSet(ModelViewSet):
