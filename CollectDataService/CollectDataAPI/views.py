@@ -1,5 +1,3 @@
-import itertools
-
 from django.contrib.sessions.models import Session
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
