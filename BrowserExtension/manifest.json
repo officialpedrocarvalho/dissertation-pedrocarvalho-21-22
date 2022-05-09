@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Web Scraper",
-    "description": "Javascript extension to record user's usage data in web applications/sites related to urls, paths travelled, actions taken and pages structure.",
+    "description": "Javascript extension to record user's usage data in web applications/sites related pages travelled and respective structure.",
     "author": "Pedro Carvalho",
     "host_permissions": [
         "*://*/",
@@ -14,7 +14,7 @@
         "cookies",
         "storage"
     ],
-    "version": "1.0.0",
+    "version": "1.0.2",
     "action": {
         "default_popup": "popup.html",
         "default_title": "Web Scraper",
