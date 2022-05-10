@@ -22,4 +22,3 @@ def create_identifiers(web_site, method, weight, similarity_offset):
         if not found:
             new = WebPageIdentifier.objects.create(pageStructure=web_page.pageStructure, similarityMethod=method)
             WebPageIdentifierWebPage.objects.create(webPageIdentifier=new, webPage=web_page, similarity=1.0)
-    return WebPageIdentifier.objects.filter(webPages__webSite=web_site, similarityMethod=method).distinct()

@@ -83,7 +83,17 @@ class WebSiteViewSet(ModelViewSet):
         similarity_offset = float(request.query_params.get('offset'))
         identifier = WebPageIdentifierSerializer(data={'similarityMethod': method})
         identifier.is_valid(raise_exception=True)
-        identifiers = create_identifiers.delay(web_site.pk, method, weight, similarity_offset)
+        create_identifiers.delay(web_site.pk, method, weight, similarity_offset)
+        return Response({"response": "Identifiers are being generated. Please wait a moment and request your results."},
+                        status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['get'], url_path='webPage/identifiers')
+    def get_web_page_similarity_ids(self, request, pk=None):
+        web_site = self.get_object()
+        method = request.query_params.get('method')
+        identifier = WebPageIdentifierSerializer(data={'similarityMethod': method})
+        identifier.is_valid(raise_exception=True)
+        identifiers = WebPageIdentifier.objects.filter(webPages__webSite=web_site, similarityMethod=method).distinct()
         serializer = WebPageIdentifierListSerializer(identifiers, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK, headers=self.get_success_headers(serializer.data))
 
@@ -96,11 +106,8 @@ class WebSiteViewSet(ModelViewSet):
         identifier = WebPageIdentifierSerializer(data={'similarityMethod': method})
         identifier.is_valid(raise_exception=True)
         sequences = build_sequences(web_site, method)
-        print("1")
         subsequences = build_subsequences(sequences, length, support)
-        print("2")
         significant_subsequences = get_significant_subsequences(subsequences)
-        print("3")
         serializer = SequenceSerializer(significant_subsequences, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK, headers=self.get_success_headers(serializer.data))
 
