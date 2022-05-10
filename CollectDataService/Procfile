@@ -1,2 +1,2 @@
 web: gunicorn CollectDataService.wsgi --timeout 30
-worker: celery worker --app=CollectDataService.app
+worker: celery --app CollectDataService worker
