@@ -6,32 +6,13 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from CollectDataAPI.tasks import create_identifiers
 
 from CollectDataAPI.models import WebSite, WebPage, Domain, WebPageIdentifier, WebPageIdentifierWebPage, Sequence, \
     SequenceIdentifier
 from CollectDataAPI.serializers import WebSiteSerializer, WebPageSerializer, \
     DomainSerializer, WebPageIdentifierSerializer, WebPageIdentifierListSerializer, SequenceSerializer
 from CollectDataAPI.utils import split_by_character_in_position, get_subsequences_gte
-
-
-def create_identifiers(web_site, method, weight, similarity_offset):
-    algorithm = MixedSimilarity(WebPageIdentifier(similarityMethod=method).get_similarity_method(),
-                                StyleSimilarity(), weight)
-    for web_page in web_site.webpage_set.all().exclude(
-            webpageidentifierwebpage__webPageIdentifier__similarityMethod=method):
-        found = False
-        for identifier in WebPageIdentifier.objects.filter(webPages__webSite=web_site, similarityMethod=method):
-            matching = algorithm.similarity(web_page.pageStructure, identifier.pageStructure)
-            print(matching, web_page.url, identifier.webPages.all().first().url)
-            if matching >= similarity_offset:
-                found = True
-                WebPageIdentifierWebPage.objects.create(webPageIdentifier=identifier, webPage=web_page,
-                                                        similarity=matching)
-                break
-        if not found:
-            new = WebPageIdentifier.objects.create(pageStructure=web_page.pageStructure, similarityMethod=method)
-            WebPageIdentifierWebPage.objects.create(webPageIdentifier=new, webPage=web_page, similarity=1.0)
-    return WebPageIdentifier.objects.filter(webPages__webSite=web_site, similarityMethod=method).distinct()
 
 
 def build_sequences(web_site, method):
@@ -102,7 +83,7 @@ class WebSiteViewSet(ModelViewSet):
         similarity_offset = float(request.query_params.get('offset'))
         identifier = WebPageIdentifierSerializer(data={'similarityMethod': method})
         identifier.is_valid(raise_exception=True)
-        identifiers = create_identifiers(web_site, method, weight, similarity_offset)
+        identifiers = create_identifiers.delay(web_site.pk, method, weight, similarity_offset)
         serializer = WebPageIdentifierListSerializer(identifiers, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK, headers=self.get_success_headers(serializer.data))
 

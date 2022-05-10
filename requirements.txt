@@ -1,7 +1,6 @@
 amqp==5.1.1
 apted==1.0.3
 asgiref==3.5.0
-async-timeout==4.0.2
 backports.zoneinfo==0.2.1
 billiard==3.6.4.0
 bleach==4.1.0
@@ -14,7 +13,6 @@ click-plugins==1.1.1
 click-repl==0.2.0
 commonmark==0.9.1
 cssselect==1.1.0
-Deprecated==1.2.13
 dj-database-url==0.5.0
 Django==3.2.12
 django-cors-headers==3.11.0
@@ -41,7 +39,6 @@ python-dateutil==2.8.2
 python-decouple==3.4
 pytz==2021.3
 readme-renderer==34.0
-redis==4.3.1
 requests==2.27.1
 requests-toolbelt==0.9.1
 rfc3986==2.0.0
@@ -56,6 +53,5 @@ vine==5.0.0
 w3lib==1.22.0
 wcwidth==0.2.5
 webencodings==0.5.1
-wrapt==1.14.1
 XlsxWriter==3.0.3
 zipp==3.8.0

@@ -1,5 +1,5 @@
-//const servicePath = "https://webpagematcher.herokuapp.com";
-const servicePath = "http://127.0.0.1:8000";
+const servicePath = "https://webpagematcher.herokuapp.com";
+//const servicePath = "http://127.0.0.1:8000";
 let previousUrl = window.location.href;
 
 /**
@@ -94,6 +94,9 @@ window.addEventListener("click", (event) => {
   }
 });
 
+/**
+ * Function that activates the loader when changing web page
+ */
 function activateLoaderProtection() {
   let protector = document.createElement("div");
   protector.id = "my-protector-pedro-carvalho";
@@ -106,6 +109,9 @@ function activateLoaderProtection() {
   body.parentNode.insertBefore(protector, body);
 }
 
+/**
+ * Function that activates the loader when changed web page
+ */
 function deactivateLoaderProtection() {
   let protector = document.querySelector("#my-protector-pedro-carvalho");
   protector.remove();
