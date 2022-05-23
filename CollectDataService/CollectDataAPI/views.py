@@ -74,7 +74,7 @@ class WebSiteViewSet(ModelViewSet):
     queryset = WebSite.objects.all()
     serializer_class = WebSiteSerializer
 
-    @action(detail=True, methods=['post'], url_path='webPage/similarity')
+    @action(detail=True, methods=['post'], url_path='webPage/identifiers')
     def create_web_page_similarity_ids(self, request, pk=None):
         web_site = self.get_object()
         method = request.query_params.get('method')
@@ -96,7 +96,7 @@ class WebSiteViewSet(ModelViewSet):
         serializer = WebPageIdentifierListSerializer(identifiers, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK, headers=self.get_success_headers(serializer.data))
 
-    @action(detail=True, methods=['post'], url_path='webPage/subsequences')
+    @action(detail=True, methods=['get'], url_path='webPage/subsequences')
     def get_web_page_most_common_subsequences(self, request, pk=None):
         web_site = self.get_object()
         length = int(request.query_params.get('length'))

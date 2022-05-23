@@ -55,6 +55,8 @@ Beyond all the CRUD operations developed, these are the endpoints that give acce
 
 - Create a Website: **POST /webSite**
   - { name: NAME }
+- Create a Web Page: **POST /webPage**
+  - { url: URL; strucutre:STRUCTURE }
 - Create Website's Web Pages Identifiers: **POST /webSite/WEBSITE_NAME/webPage/identifiers?method=METHOD_IDENTIFIER&weight=WEIGHT&offset=OFFSET**
 - Get Website's Web Pages Identifiers: **GET /webSite/WEBSITE_NAME/webPage/identifiers?method=METHOD_IDENTIFIER**
 - Get Website's Common Paths:**GET /webSite/WEBSITE_NAME/webPage/subsequences?method=METHOD_IDENTIFIER&length=LENGTH&support=SUPPORT**
