@@ -24,9 +24,9 @@ class WebPage(models.Model):
 
 class WebPageIdentifier(models.Model):
     class SimilarityMethods(models.TextChoices):
-        LCS = '1', 'LCS'
+        LCS = '1', 'MS'
         APTED = '2', 'APTED'
-        LCS_OPTIMIZED = '3', 'LCS_Optimized'
+        LCS_OPTIMIZED = '3', 'MS_Optimized'
         APTED_OPTIMIZED = '4', 'APTED_Optimized'
 
     webPages = models.ManyToManyField(WebPage, through='WebPageIdentifierWebPage')

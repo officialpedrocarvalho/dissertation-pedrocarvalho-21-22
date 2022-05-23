@@ -1,17 +1,16 @@
 from django.contrib.sessions.models import Session
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
-from html_matcher import StyleSimilarity, MixedSimilarity
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from CollectDataAPI.tasks import create_identifiers
 
 from CollectDataAPI.models import WebSite, WebPage, Domain, WebPageIdentifier, WebPageIdentifierWebPage, Sequence, \
     SequenceIdentifier
 from CollectDataAPI.serializers import WebSiteSerializer, WebPageSerializer, \
     DomainSerializer, WebPageIdentifierSerializer, WebPageIdentifierListSerializer, SequenceSerializer
+from CollectDataAPI.tasks import create_identifiers
 from CollectDataAPI.utils import split_by_character_in_position, get_subsequences_gte
 
 
