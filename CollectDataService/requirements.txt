@@ -21,7 +21,7 @@ django-cors-headers==3.11.0
 djangorestframework==3.13.1
 docutils==0.18.1
 gunicorn==20.1.0
-html-matcher==0.0.9
+html-matcher==0.1.1
 html-similarity==0.3.3
 idna==3.3
 importlib-metadata==4.11.3
