@@ -1,9 +1,7 @@
-from pprint import pprint
-
-from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer
 
-from CollectDataAPI.models import WebPageIdentifier, WebSite, Domain, WebPage, WebPageIdentifierWebPage, Sequence
+from CollectDataAPI.models import WebPageIdentifier, WebSite, Domain, WebPage, Sequence
 
 
 class WebSiteSerializer(ModelSerializer):

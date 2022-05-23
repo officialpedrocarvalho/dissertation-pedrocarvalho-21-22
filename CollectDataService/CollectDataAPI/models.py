@@ -1,6 +1,6 @@
 from django.contrib.sessions.models import Session
 from django.db import models
-from html_matcher import LongestCommonSequence, LongestCommonSequenceOptimized, AllPathTreeEditDistance, \
+from html_matcher import MatchingSubsequences, MatchingSubsequencesOptimized, AllPathTreeEditDistance, \
     AllPathTreeEditDistanceOptimized
 from rest_framework import serializers
 
@@ -36,11 +36,11 @@ class WebPageIdentifier(models.Model):
 
     def get_similarity_method(self):
         if self.similarityMethod == '1':
-            return LongestCommonSequence()
+            return MatchingSubsequences()
         elif self.similarityMethod == '2':
             return AllPathTreeEditDistance()
         elif self.similarityMethod == '3':
-            return LongestCommonSequenceOptimized()
+            return MatchingSubsequencesOptimized()
         elif self.similarityMethod == '4':
             return AllPathTreeEditDistanceOptimized()
         else:
