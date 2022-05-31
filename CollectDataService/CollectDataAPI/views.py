@@ -86,7 +86,7 @@ class WebSiteViewSet(ModelViewSet):
         return Response({"response": "Identifiers are being generated. Please wait a moment and request your results."},
                         status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['get'], url_path='webPage/identifiers')
+    @create_web_page_similarity_ids.mapping.get
     def get_web_page_similarity_ids(self, request, pk=None):
         web_site = self.get_object()
         method = request.query_params.get('method')
