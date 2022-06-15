@@ -9,7 +9,8 @@ from rest_framework.viewsets import ModelViewSet
 from CollectDataAPI.models import WebSite, WebPage, Domain, WebPageIdentifier, WebPageIdentifierWebPage, Sequence, \
     SequenceIdentifier
 from CollectDataAPI.serializers import WebSiteSerializer, WebPageSerializer, \
-    DomainSerializer, WebPageIdentifierSerializer, WebPageIdentifierListSerializer, SequenceSerializer
+    DomainSerializer, WebPageIdentifierSerializer, WebPageIdentifierListSerializer, SequenceSerializer, \
+    WebPageListSerializer
 from CollectDataAPI.tasks import create_identifiers
 from CollectDataAPI.utils import split_by_character_in_position, get_subsequences_gte
 
@@ -22,7 +23,8 @@ def build_sequences(web_site, method):
     sequences = []
     for session in sessions:
         sequence = Sequence.objects.create()
-        for matching in matches.order_by("webPage__created_at"):
+        matches = matches.order_by("webPage__created_at")
+        for matching in matches:
             if matching.webPage.session.session_key == session:
                 SequenceIdentifier.objects.create(webPageIdentifier=matching.webPageIdentifier, sequence=sequence)
         sequences.append(sequence)
@@ -105,7 +107,9 @@ class WebSiteViewSet(ModelViewSet):
         identifier = WebPageIdentifierSerializer(data={'similarityMethod': method})
         identifier.is_valid(raise_exception=True)
         sequences = build_sequences(web_site, method)
+        #serializer = SequenceSerializer(sequences, many=True)
         subsequences = build_subsequences(sequences, length, support)
+        #serializer = SequenceSerializer(subsequences, many=True)
         significant_subsequences = get_significant_subsequences(subsequences)
         serializer = SequenceSerializer(significant_subsequences, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK, headers=self.get_success_headers(serializer.data))
@@ -137,3 +141,11 @@ class WebPageViewSet(ModelViewSet):
         serializer.save(session=session, webSite=domain.webSite)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    @action(detail=False, methods=['get'], url_path='identifier')
+    def get_web_pages_with_id(self, request, pk=None):
+        identifier = int(request.query_params.get('id'))
+        identifier = WebPageIdentifier.objects.filter(pk=identifier)
+        pages = WebPage.objects.filter(webpageidentifierwebpage__webPageIdentifier=identifier.first())
+        serializer = WebPageListSerializer(pages, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK, headers=self.get_success_headers(serializer.data))

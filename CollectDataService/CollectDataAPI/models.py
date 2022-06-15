@@ -30,6 +30,7 @@ class WebPageIdentifier(models.Model):
         APTED_OPTIMIZED = '4', 'APTED_Optimized'
 
     webPages = models.ManyToManyField(WebPage, through='WebPageIdentifierWebPage')
+    url = models.URLField(max_length=1024)
     pageStructure = models.TextField()
     similarityMethod = models.CharField(max_length=2, choices=SimilarityMethods.choices,
                                         default=SimilarityMethods.LCS_OPTIMIZED)
